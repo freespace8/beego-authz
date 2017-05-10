@@ -59,6 +59,10 @@ func NewAuthorizer(e *casbin.Enforcer) beego.FilterFunc {
 	}
 }
 
+func SetAuthorizerUserName(ctx *context.Context, userName string) {
+	ctx.Input.CruSession.Set("Authorization", userName)
+}
+
 // BasicAuthorizer stores the casbin handler
 type BasicAuthorizer struct {
 	enforcer *casbin.Enforcer
