@@ -40,10 +40,11 @@
 package authz
 
 import (
+	"net/http"
+
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
 	"github.com/hsluoyz/casbin"
-	"net/http"
 )
 
 // NewAuthorizer returns the authorizer.
@@ -52,7 +53,7 @@ func NewAuthorizer(e *casbin.Enforcer) beego.FilterFunc {
 	return func(ctx *context.Context) {
 		a := &BasicAuthorizer{enforcer: e}
 
-		if !a.CheckPermission(ctx.Request) {
+		if !a.CheckPermission(ctx) {
 			a.RequirePermission(ctx.ResponseWriter)
 		}
 	}
@@ -65,17 +66,21 @@ type BasicAuthorizer struct {
 
 // GetUserName gets the user name from the request.
 // Currently, only HTTP basic authentication is supported
-func (a *BasicAuthorizer) GetUserName(r *http.Request) string {
-	username, _, _ := r.BasicAuth()
-	return username
+func (a *BasicAuthorizer) GetUserName(ctx *context.Context) string {
+	auth := ctx.Input.CruSession.Get("Authorization")
+	if auth != nil {
+		return auth.(string)
+	}
+
+	return ""
 }
 
 // CheckPermission checks the user/method/path combination from the request.
 // Returns true (permission granted) or false (permission forbidden)
-func (a *BasicAuthorizer) CheckPermission(r *http.Request) bool {
-	user := a.GetUserName(r)
-	method := r.Method
-	path := r.URL.Path
+func (a *BasicAuthorizer) CheckPermission(ctx *context.Context) bool {
+	user := a.GetUserName(ctx)
+	method := ctx.Request.Method
+	path := ctx.Request.URL.Path
 	return a.enforcer.Enforce(user, path, method)
 }
 
