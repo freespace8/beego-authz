@@ -74,9 +74,9 @@ func (a *BasicAuthorizer) GetUserName(ctx *context.Context) string {
 	auth := ctx.Input.CruSession.Get("Authorization")
 	if auth != nil {
 		return auth.(string)
+	} else {
+		return "admin"
 	}
-
-	return ""
 }
 
 // CheckPermission checks the user/method/path combination from the request.
