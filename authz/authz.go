@@ -75,7 +75,7 @@ func (a *BasicAuthorizer) GetUserName(ctx *context.Context) string {
 	if auth != nil {
 		return auth.(string)
 	} else {
-		return "admin"
+		return "guest"
 	}
 }
 
